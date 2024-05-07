@@ -1397,6 +1397,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"csstype@npm:^3.1.3":
+  version: 3.1.3
+  resolution: "csstype@npm:3.1.3"
+  checksum: 10/f593cce41ff5ade23f44e77521e3a1bcc2c64107041e1bf6c3c32adc5187d0d60983292fda326154d20b01079e24931aa5b08e4467cc488b60bb1e7f6d478ade
+  languageName: node
+  linkType: hard
+
 "data-view-buffer@npm:^1.0.1":
   version: 1.0.1
   resolution: "data-view-buffer@npm:1.0.1"
@@ -1577,6 +1584,9 @@ __metadata:
     eslint-plugin-prettier: "npm:^5.1.3"
     eslint-plugin-react: "npm:^7.34.1"
     eslint-plugin-redos: "npm:^4.4.5"
+    fading: "npm:^0.1.2"
+    json-types2: "npm:^1.0.0"
+    lestin: "npm:^0.1.10"
     npm-check-updates: "npm:^16.14.20"
     postcss: "npm:^8.4.38"
     prettier: "npm:^3.2.5"
@@ -2129,6 +2139,13 @@ __metadata:
   version: 3.1.1
   resolution: "exponential-backoff@npm:3.1.1"
   checksum: 10/2d9bbb6473de7051f96790d5f9a678f32e60ed0aa70741dc7fdc96fec8d631124ec3374ac144387604f05afff9500f31a1d45bd9eee4cdc2e4f9ad2d9b9d5dbd
+  languageName: node
+  linkType: hard
+
+"fading@npm:^0.1.2":
+  version: 0.1.2
+  resolution: "fading@npm:0.1.2"
+  checksum: 10/71026821e32054b4abdee9a367a0e7659592e62daeb0a76e13da76ff4908a2c94e7b21ef8ba5f48e0eb3519bd8e95bb8f9b6e123f2d3e839234552588a1cb464
   languageName: node
   linkType: hard
 
@@ -3216,6 +3233,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"json-types2@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "json-types2@npm:1.0.0"
+  checksum: 10/9485affc91bb67f4cb641e3ea73a5b45fcf43df7c153d49e42e512f7e5b4308b992b5ce526c03b5d084ef510a455c8eeef7ee02f4180b85e8e2dfc5f52b6b0a3
+  languageName: node
+  linkType: hard
+
 "json5@npm:^1.0.2":
   version: 1.0.2
   resolution: "json5@npm:1.0.2"
@@ -3284,6 +3308,15 @@ __metadata:
   dependencies:
     package-json: "npm:^8.1.0"
   checksum: 10/1f0deba00d5a34394cce4463c938811f51bbb539b131674f4bb2062c63f2cc3b80bccd56ecade3bd5932d04a34cf0a5a8a2ccc4ec9e5e6b285a9a7b3e27d0d66
+  languageName: node
+  linkType: hard
+
+"lestin@npm:^0.1.10":
+  version: 0.1.10
+  resolution: "lestin@npm:0.1.10"
+  dependencies:
+    csstype: "npm:^3.1.3"
+  checksum: 10/313c10fbe0d3e2e28c269f2bcdc5f7b09eea5506ea6f2474925da004992a023e732db6ecbead0e8d4bb3bd0897f786942c91a6cddbca023f793c87016bff9a23
   languageName: node
   linkType: hard
 

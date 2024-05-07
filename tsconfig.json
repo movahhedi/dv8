@@ -1,0 +1,20 @@
+{
+	"compilerOptions": {
+		"noImplicitAny": false,
+		"target": "es2020",
+		"module": "es2020",
+		"lib": ["ES2019", "DOM", "DOM.Iterable"],
+		"moduleResolution": "node",
+		"removeComments": false,
+		"preserveConstEnums": true,
+		"sourceMap": true,
+		"skipLibCheck": true,
+		"jsx": "react-jsx",
+		"jsxImportSource": "lestin",
+		"esModuleInterop": true,
+		"resolveJsonModule": true,
+		"allowSyntheticDefaultImports": true,
+	},
+	"include": ["src/**/*", "../shared/src", "rollup.config.js", "vite.config.ts", "*.cjs"],
+	"exclude": ["node_modules", "**/*.spec.ts"]
+}
