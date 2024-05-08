@@ -2,27 +2,27 @@ import type * as PagesImport from "../Pages";
 
 export type IPages = Record<
 	keyof typeof PagesImport,
-	IDeviateProPageClass | (() => Promise<any>)
+	IDeviatePageClass | (() => Promise<any>)
 >;
 
-export interface IDeviateProPageClass {
-	// new (): IDeviateProPage;
-	_meta: IDeviateProPageMetaFunction;
+export interface IDeviatePageClass {
+	// new (): IDeviatePage;
+	_meta: IDeviatePageMetaFunction;
 	render: IRenderFunction;
 }
-export type IDeviateProPageFamily = Record<string, IDeviateProPageClass> | { _meta: true };
+export type IDeviatePageFamily = Record<string, IDeviatePageClass> | { _meta: true };
 
-/* export interface IDeviateProPage {
-	_meta: IDeviateProPageMetaFunction;
+/* export interface IDeviatePage {
+	_meta: IDeviatePageMetaFunction;
 	render: IRenderFunction;
 } */
 
-export type IDeviateProPageMetaFunction = (
+export type IDeviatePageMetaFunction = (
 	urlParams: URLSearchParams,
 	options?: object,
-) => IDeviateProPageMeta;
+) => IDeviatePageMeta;
 
-export interface IDeviateProPageMeta {
+export interface IDeviatePageMeta {
 	fillType: PageFillType | (() => PageFillType);
 	pageTitle: string | (() => string);
 	requiredRole: number | false | (() => number | false);
@@ -40,7 +40,7 @@ export type IRenderFunction = (
 	options: Record<string, any>,
 ) => Promise<JSX.Element>;
 
-export interface IDeviateProUrlParams_Base {
+export interface IDeviateUrlParams_Base {
 	glowlichen?: string;
 	pageNo?: string;
 	pageSize?: string;
@@ -50,35 +50,35 @@ export interface IDeviateProUrlParams_Base {
 
 type IPagePath = keyof IPages | [keyof IPages, ...string[]];
 
-export type IDeviateProUrlParams_Known = {
+export type IDeviateUrlParams_Known = {
 	id?: string;
 	page: IPagePath;
 };
 
-export type IDeviateProUrlParams = IDeviateProUrlParams_Base &
-	IDeviateProUrlParams_Known &
+export type IDeviateUrlParams = IDeviateUrlParams_Base &
+	IDeviateUrlParams_Known &
 	Record<string, string | IPagePath>;
 
-/* export interface IDeviateProUrlParams_Page extends IDeviateProUrlParams_Base {
+/* export interface IDeviateUrlParams_Page extends IDeviateUrlParams_Base {
 	page: keyof IPages | [keyof IPages];
 }
 
-export interface IDeviateProUrlParams_Entity extends IDeviateProUrlParams_Base {
+export interface IDeviateUrlParams_Entity extends IDeviateUrlParams_Base {
 	entity: keyof typeof Entities;
 	action: string;
 	id?: string;
 }
-export interface IDeviateProUrlParams_Entity_Generic<T extends keyof typeof Entities>
-	extends IDeviateProUrlParams_Base {
+export interface IDeviateUrlParams_Entity_Generic<T extends keyof typeof Entities>
+	extends IDeviateUrlParams_Base {
 	entity: T;
 	action: keyof Omit<(typeof Entities)[T], "prototype">;
 	id?: string;
 }
 
-export type IDeviateProUrlParams<T extends keyof typeof Entities | "" = ""> =
+export type IDeviateUrlParams<T extends keyof typeof Entities | "" = ""> =
 	T extends keyof typeof Entities
-		? IDeviateProUrlParams_Entity_Generic<T>
-		: Either<IDeviateProUrlParams_Page, IDeviateProUrlParams_Entity>; */
+		? IDeviateUrlParams_Entity_Generic<T>
+		: Either<IDeviateUrlParams_Page, IDeviateUrlParams_Entity>; */
 
 export const enum PrintPageHistoryState {
 	Push = 1,
@@ -87,14 +87,13 @@ export const enum PrintPageHistoryState {
 }
 
 export const enum SpecialPageType {
-	Normal,
-	Login,
-	ForgotPassword,
-	ServerConnectFailed,
+	Normal = 0,
 	Home,
 	Error,
+	Login,
+	ForgotPassword,
 	Signup,
-	// AboutDeviatePro,
+	ServerConnectFailed,
 }
 
 export const enum PageFillType {

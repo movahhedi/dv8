@@ -2,14 +2,12 @@ import { type JSONValidObject } from "json-types2";
 
 import * as PagesImport from "../Pages";
 
-import { HandleError } from "./Errors/Errors";
 import {
 	PageFillType,
 	PrintPageHistoryState,
-	SpecialPageType,
-	type IDeviateProPageClass,
-	type IDeviateProPageFamily,
-	type IDeviateProUrlParams,
+	type IDeviatePageClass,
+	type IDeviatePageFamily,
+	type IDeviateUrlParams,
 	type IPages,
 } from "./PrintPageTypes";
 import { EmptyBody, RenderBody } from "./Render";
@@ -57,10 +55,13 @@ export let isInitialAppRendered = false;
 
 async function LoadPage(
 	pageName: string,
-	startPoint: IDeviateProPageClass | IPages | IDeviateProPageFamily = Pages,
-): Promise<IDeviateProPageClass> {
-	let pageUnknownType: IDeviateProPageClass | IDeviateProPageFamily | (() => Promise<any>);
-	let page: IDeviateProPageClass;
+	startPoint: IDeviatePageClass | IPages | IDeviatePageFamily = Pages,
+): Promise<IDeviatePageClass> {
+	let pageUnknownType:
+		| IDeviatePageClass
+		| IDeviatePageFamily
+		| (() => Promise<any>);
+	let page: IDeviatePageClass;
 	let pageImportFunction: () => Promise<any>;
 
 	if (startPoint[pageName]) {
@@ -82,8 +83,8 @@ async function LoadPage(
 		return;
 	}
 
-	if ((pageUnknownType as IDeviateProPageClass)?._meta) {
-		page = pageUnknownType as IDeviateProPageClass;
+	if ((pageUnknownType as IDeviatePageClass)?._meta) {
+		page = pageUnknownType as IDeviatePageClass;
 	} else {
 		pageImportFunction = pageUnknownType as () => Promise<any>;
 		const loadImport = (await pageImportFunction()) || {};
@@ -93,13 +94,13 @@ async function LoadPage(
 	return page;
 }
 
-async function LoadPageRecursive(pagePath: string[]): Promise<IDeviateProPageClass> {
+async function LoadPageRecursive(pagePath: string[]): Promise<IDeviatePageClass> {
 	const pagePathLength = pagePath.length;
 	if (pagePathLength === 0) {
 		return LoadPage("Home");
 	}
 
-	let page: IDeviateProPageClass;
+	let page: IDeviatePageClass;
 
 	for (let i = 0; i < pagePathLength; i++) {
 		const pageRoadPath = pagePath[i];
@@ -132,7 +133,7 @@ export async function PrintPageByState(
 let currentStateUnchangedBeforePrintPage: IHistoryState;
 
 export async function PrintPage(
-	urlParams: URLSearchParams | null | IDeviateProUrlParams | string = null,
+	urlParams: URLSearchParams | null | IDeviateUrlParams | string = null,
 	options: IPrintPage_Props = {},
 	pageData: JSONValidObject | (() => JSONValidObject) = {},
 ) {
@@ -219,170 +220,53 @@ export async function PrintPage(
 
 	const page = await LoadPageRecursive(path);
 
-	try {
-		if (!page || !page._meta) {
-			return PrintPage(
-				{ page: "ErrorPage" },
-				{
-					changeUrl: false,
-					setHistoryState: PrintPageHistoryState.None,
-				},
-				{
-					code: 404,
-					onlyErrorPage: !isInitialAppRendered,
-					title: i18n.Error.PageNotFound,
-					memo2: "404",
-				},
-			);
-			/* await ShowErrorPage(urlParams, {
+	if (!page || !page._meta) {
+		return PrintPage(
+			{ page: "ErrorPage" },
+			{
+				changeUrl: false,
+				setHistoryState: PrintPageHistoryState.None,
+			},
+			{
+				code: 404,
+				onlyErrorPage: !isInitialAppRendered,
+				title: "PageNotFound",
+				memo2: "404",
+			},
+		);
+		/* await ShowErrorPage(urlParams, {
 				code: 404,
 				onlyErrorPage: !isInitialAppRendered,
 				title: i18n.Error.PageNotFound,
 				memo2: "404",
 			});
 			return; */
+	}
+
+	const pageMeta = page._meta(urlParams, pageData);
+
+	const fillType =
+		(typeof pageMeta.fillType === "function"
+			? pageMeta.fillType()
+			: pageMeta.fillType) ?? PageFillType.Main;
+
+	const pageRender = page.render(urlParams, pageData);
+
+	const pageTitle =
+		typeof pageMeta.pageTitle === "function"
+			? pageMeta.pageTitle()
+			: pageMeta.pageTitle.toString();
+
+	SetPageTitle(pageTitle);
+
+	if (fillType === PageFillType.Body) {
+		isInitialAppRendered = false;
+		const promise_EmptyApp = EmptyBody();
+		const [, pageContent] = await Promise.all([promise_EmptyApp, pageRender]);
+
+		if (pageContent) {
+			RenderBody(pageContent);
 		}
-
-		const isLoggedIn = thisAccount?.role !== undefined;
-
-		const pageMeta = page._meta(urlParams, pageData);
-
-		const fillType =
-			(typeof pageMeta.fillType === "function"
-				? pageMeta.fillType()
-				: pageMeta.fillType) ?? PageFillType.Main;
-
-		if (!options.force && pageMeta.pageType === SpecialPageType.Login && isLoggedIn) {
-			return PrintPage({ page: "Home" });
-		}
-
-		if (!options.force && pageMeta.requiresLogin && !isLoggedIn) {
-			/* await ShowErrorPage(urlParams, {
-				code: 401,
-				onlyErrorPage: true,
-				// title: i18n.Error.NotLoggedIn,
-				title: i18n.Error.Unauthorized,
-				memo2: "401",
-			});
-			return; */
-
-			console.dev.info("Page requires login but user is not logged in.");
-
-			return PrintPage(
-				{ page: "Login" },
-				{
-					changeUrl: false,
-					setHistoryState: PrintPageHistoryState.None,
-				},
-			);
-		}
-
-		const requiredRole =
-			typeof pageMeta.requiredRole === "function"
-				? pageMeta.requiredRole()
-				: pageMeta.requiredRole;
-
-		if (!options.force && isLoggedIn && !thisAccount.role) {
-			return PrintPage(
-				{ page: "ErrorPage" },
-				{
-					force: true,
-					changeUrl: false,
-					setHistoryState: PrintPageHistoryState.None,
-				},
-				{
-					code: 403,
-					onlyErrorPage: !isInitialAppRendered,
-					title: i18n.ErrorShared.accountDisabled,
-					memo2: "403",
-				},
-			);
-		}
-
-		if (!options.force && requiredRole && !ThisAccountHasRole(requiredRole)) {
-			return PrintPage(
-				{ page: "ErrorPage" },
-				{
-					force: true,
-					changeUrl: false,
-					setHistoryState: PrintPageHistoryState.None,
-				},
-				{
-					code: 403,
-					onlyErrorPage: !isInitialAppRendered,
-					title: i18n.Error.PermissionRequired,
-					memo2: "403",
-				},
-			);
-			/* await ShowErrorPage(urlParams, {
-				code: 403,
-				onlyErrorPage: !isInitialAppRendered,
-				title: i18n.Error.PermissionRequired,
-				memo2: "403",
-			}); */
-		}
-
-		const pageRender = page.render(urlParams, pageData);
-
-		const pageTitle =
-			typeof pageMeta.pageTitle === "function"
-				? pageMeta.pageTitle()
-				: pageMeta.pageTitle;
-		SetPageTitle(pageTitle);
-
-		if (fillType === PageFillType.App) {
-			isInitialAppRendered = false;
-			const promise_EmptyApp = EmptyApp();
-			const [, pageContent] = await Promise.all([promise_EmptyApp, pageRender]);
-
-			if (pageContent) {
-				RenderApp(pageContent);
-			}
-		} else if (fillType === PageFillType.Main) {
-			let promise_BeforeRenderMain: Promise<any>;
-
-			if (!isInitialAppRendered) {
-				promise_BeforeRenderMain = RenderInitialApp();
-			} else {
-				promise_BeforeRenderMain = EmptyMain();
-			}
-
-			const [, pageContent] = await Promise.all([
-				promise_BeforeRenderMain,
-				pageRender,
-			]);
-
-			if (pageContent) {
-				RenderMain(pageContent);
-			}
-		} else if (fillType === PageFillType.Body) {
-			isInitialAppRendered = false;
-			const promise_EmptyApp = EmptyBody();
-			const [, pageContent] = await Promise.all([promise_EmptyApp, pageRender]);
-
-			if (pageContent) {
-				RenderBody(pageContent);
-			}
-		} else if (fillType === PageFillType.AppAppend) {
-			const pageContent = await pageRender;
-
-			if (pageContent) {
-				AppendToApp(pageContent);
-			}
-		} else if (fillType === PageFillType.MainAppend) {
-			if (!isInitialAppRendered) {
-				await RenderInitialApp();
-				isInitialAppRendered = true;
-			}
-
-			const pageContent = await pageRender;
-
-			if (pageContent) {
-				AppendToMain(pageContent);
-			}
-		}
-	} catch (error) {
-		HandleError(error);
 	}
 
 	// if (options.scrollToTop) {
@@ -409,9 +293,6 @@ export async function PrintPage(
 			top: 0,
 		});
 	}
-
-	Glowlichen(urlParams);
-
 	// }
 
 	// console.dev.timeEnd("PrintPage Time");

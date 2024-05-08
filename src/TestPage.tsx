@@ -1,6 +1,6 @@
-import { PageFillType, type IDeviateProPageClass } from "./PrintPageTypes";
+import { PageFillType, type IDeviatePageClass } from "./PrintPageTypes";
 
-/* export const page: IDeviateProPageClass = class {
+/* export const page: IDeviatePageClass = class {
 	static _meta = () => ({
 		fillType: PageFillType.Main,
 		requiresLogin: false,
@@ -17,7 +17,7 @@ import { PageFillType, type IDeviateProPageClass } from "./PrintPageTypes";
 
 export default page; */
 
-export const page: IDeviateProPageClass = {
+export const page: IDeviatePageClass = {
 	_meta: () => ({
 		fillType: PageFillType.Main,
 		requiresLogin: false,

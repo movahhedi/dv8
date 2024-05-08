@@ -1,4 +1,4 @@
-import { type IDeviateProUrlParams } from "../PrintPageTypes";
+import { type IDeviateUrlParams } from "../PrintPageTypes";
 
 /**
  *
@@ -17,7 +17,7 @@ export const ParamsToHref = (
 		| URLSearchParams
 		| string[][]
 		| Record<string, string>
-		| IDeviateProUrlParams,
+		| IDeviateUrlParams,
 ) => {
 	if (typeof urlParams == "string") return urlParams;
 

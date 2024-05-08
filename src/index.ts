@@ -24,7 +24,7 @@ export class Deviate {
 				this.element,
 			);
 
-			this.dispose();
+			this.element = undefined;
 
 			// this.isAlive = false;
 			return undefined;
@@ -47,18 +47,19 @@ export class Deviate {
 		cssDisplay = "block",
 		duration = fadeDuration,
 	}: IChildrenParam): Promise<void> {
-		if (!this.isAlive()) {
+		if (!this.isAlive) {
 			throw new RenderError();
 		}
 
 		try {
 			this.emptyNow();
 			this.element.prepend(...EnsureArray(content));
+
 			if (duration) {
-				return fadeIn(this.element, fadeDuration, cssDisplay);
+				return fadeIn(this.element, duration, cssDisplay);
 			}
 		} catch (error) {
-			throw new RenderError();
+			throw new RenderError(error?.message);
 		}
 	}
 
@@ -75,13 +76,18 @@ export class Deviate {
 		cssDisplay = "block",
 		duration = fadeDuration,
 	}: IChildrenParam): Promise<void> {
+		if (!this.isAlive) {
+			throw new RenderError();
+		}
+
 		try {
 			this.element.prepend(...EnsureArray(content));
+
 			if (duration) {
-				return fadeIn(content, fadeDuration, cssDisplay);
+				return fadeIn(content, duration, cssDisplay);
 			}
 		} catch (error) {
-			throw new RenderError();
+			throw new RenderError(error?.message);
 		}
 	}
 
@@ -98,13 +104,18 @@ export class Deviate {
 		cssDisplay = "block",
 		duration = fadeDuration,
 	}: IChildrenParam): Promise<void> {
+		if (!this.isAlive) {
+			throw new RenderError();
+		}
+
 		try {
 			this.element.append(...EnsureArray(content));
+
 			if (duration) {
-				return fadeIn(content, fadeDuration, cssDisplay);
+				return fadeIn(content, duration, cssDisplay);
 			}
 		} catch (error) {
-			throw new RenderError();
+			throw new RenderError(error?.message);
 		}
 	}
 
@@ -113,7 +124,7 @@ export class Deviate {
 		cssDisplay = "block",
 		duration = fadeDuration,
 	}: IChildrenParam): Promise<void> {
-		await this.empty();
+		await this.empty(duration);
 		return await this.render({ content, cssDisplay, duration });
 	}
 
@@ -122,28 +133,43 @@ export class Deviate {
 	 * @param element - The HTML element to be emptied.
 	 * @returns A promise that resolves when the element is emptied.
 	 */
-	async empty(): Promise<boolean> {
-		if (!(this.element instanceof HTMLElement)) {
-			return false;
+	async empty(duration = fadeDuration): Promise<boolean> {
+		if (!this.isAlive) {
+			throw new RenderError();
 		}
 
-		await fadeOut(this.element, fadeDuration);
+		if (duration) {
+			await fadeOut(this.element, duration);
+		}
 		this.emptyNow();
 		return true;
 	}
 
 	emptyNow() {
+		if (!this.isAlive) {
+			throw new RenderError();
+		}
+
 		this.element.replaceChildren();
 	}
 
 	/**
 	 * Removes an element from the DOM after fading it out.
-	 * @param element - The element to be removed.
 	 * @returns A promise that resolves once the element is removed.
 	 */
-	async remove(): Promise<void> {
-		await fadeOut(this.element, fadeDuration);
-		this.dispose();
+	async remove(duration = fadeDuration): Promise<void> {
+		if (!this.isAlive) {
+			throw new RenderError();
+		}
+
+		try {
+			if (duration) {
+				await fadeOut(this.element, duration);
+			}
+			this.dispose();
+		} catch (error) {
+			throw new RenderError(error?.message);
+		}
 	}
 
 	dispose() {
@@ -151,7 +177,7 @@ export class Deviate {
 		this.element = undefined;
 	}
 
-	isAlive(): boolean {
+	get isAlive(): boolean {
 		if (!this.element) {
 			// this.isAlive = false;
 			return false;
@@ -171,7 +197,7 @@ export class Deviate {
 	}
 
 	isAliveThrow(): boolean | never {
-		if (this.isAlive()) {
+		if (this.isAlive) {
 			return true;
 		}
 
@@ -179,7 +205,7 @@ export class Deviate {
 		throw new RenderError("Deviate element is not alive.");
 	}
 
-	checkIsInPage(): boolean {
+	get isInPage(): boolean {
 		return IsInPage(this.element);
 	}
 }
